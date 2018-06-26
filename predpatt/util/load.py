@@ -53,13 +53,15 @@ def load_conllu(filename):
                     if not has_sent_id:   # don't take subsequent comments as sent_id
                         sent_id = line[1:].strip()
                 continue
-            line = line.split('\t') # data appears to use '\t'
+            line = line.split('\t')     # data appears to use '\t'
             if '-' in line[0]:      # skip multi-tokens, e.g., on Spanish UD bank
+                continue
+            if '.' in line[0]:  # Skip ellipsis empty tokens for enhanced UD
                 continue
             assert len(line) == 10, line
             lines.append(line)
-        [_, tokens, _, tags, _, _, gov, gov_rel, _, _] = list(zip(*lines))
-        triples = [DepTriple(rel, int(gov)-1, dep) for dep, (rel, gov) in enumerate(zip(gov_rel, gov))]
+        [_, tokens, _, tags, _, _, head, gov_rel, _, _] = list(zip(*lines))
+        triples = [DepTriple(rel, int(gov) - 1, dep) for dep, (rel, gov) in enumerate(zip(gov_rel, head))]
         parse = UDParse(list(tokens), tags, triples)
         yield sent_id, parse
         sent_num += 1
@@ -91,10 +93,10 @@ def get_udparse(sent, tool):
     # Extract POS tags
     tags = get_tags(sent.tokenization, 'POS')
 
-    #triples.sort(key=lambda triple: triple.dep)
+    # triples.sort(key=lambda triple: triple.dep)
     parse = UDParse(tokens=tokens, tags=tags, triples=triples)
 
     # Extract lemmas
-    #parse.lemmas = get_tags(sent.tokenization, 'LEMMA')
+    # parse.lemmas = get_tags(sent.tokenization, 'LEMMA')
 
     return parse

@@ -25,6 +25,7 @@ Predicate and argument filter functions.
 #   post-hoc, and they're the least universal. These could live in a flag,
 #   though.
 
+
 def isNotInterrogative(pred):
     # tokens = [tk.text for tk in pred.tokens]
     tokens = pred.tokens
@@ -60,6 +61,8 @@ def isNotCopula(pred):
         return False
     # just in case for parsing error (from Stanford Parser)
     if set(pred_deps_txt).intersection(set(copula_verbs)):
+        return False
+    if pred.root.text in copula_verbs:
         return False
     else:
         filter_rules = getattr(pred, 'rules', [])
